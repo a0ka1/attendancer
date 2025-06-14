@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Save, Car } from 'lucide-react';
 import { SignatureModalProps } from '../types';
 
@@ -10,11 +10,9 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   driverName,
   shift
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
   const [log, setLog] = useState('');
   const [carReceived, setCarReceived] = useState('');
-  const [hasSignature, setHasSignature] = useState(false);
+  const [carError, setCarError] = useState('');
 
   const getShiftDisplay = (shift: string) => {
     switch (shift) {
@@ -32,86 +30,62 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   };
 
   useEffect(() => {
-    if (isOpen && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.strokeStyle = '#1f2937';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        setHasSignature(false);
-      }
-    }
     // Reset form when modal opens
     if (isOpen) {
       setLog('');
       setCarReceived('');
+      setCarError('');
     }
   }, [isOpen]);
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    setIsDrawing(true);
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const rect = canvas.getBoundingClientRect();
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.beginPath();
-        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-      }
+  const validateCarNumber = (value: string) => {
+    if (value === '') {
+      setCarError('');
+      return true;
     }
+
+    const num = parseInt(value);
+    if (isNaN(num) || num < 1 || num > 1000) {
+      setCarError('Car number must be between 1 and 1000');
+      return false;
+    }
+
+    setCarError('');
+    return true;
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const rect = canvas.getBoundingClientRect();
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-        ctx.stroke();
-        setHasSignature(true);
-      }
-    }
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
-
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        setHasSignature(false);
-      }
-    }
+  const handleCarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCarReceived(value);
+    validateCarNumber(value);
   };
 
   const handleSave = () => {
-    if (!hasSignature || !log.trim()) return;
-    
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const signature = canvas.toDataURL();
-      onSave(signature, log.trim(), type === 'check-in' ? carReceived : undefined);
-      setLog('');
-      setCarReceived('');
-      clearSignature();
+    if (!log.trim()) return;
+
+    if (type === 'check-in') {
+      if (!carReceived.trim()) {
+        setCarError('Car number is required for check-in');
+        return;
+      }
+      if (!validateCarNumber(carReceived)) {
+        return;
+      }
     }
+
+    onSave(log.trim(), type === 'check-in' ? carReceived : undefined);
+    setLog('');
+    setCarReceived('');
+    setCarError('');
   };
+
+  const isFormValid = log.trim() && (type === 'check-out' || (carReceived.trim() && !carError));
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between">
             <div>
@@ -119,7 +93,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                 {type === 'check-in' ? 'Check In Process' : 'Check Out Process'}
               </h2>
               <p className="text-gray-600 mt-1">
-                Driver: <span className="font-semibold">{driverName}</span> • 
+                Driver: <span className="font-semibold">{driverName}</span> •
                 Shift: <span className="font-semibold">{getShiftDisplay(shift)}</span>
               </p>
             </div>
@@ -137,15 +111,21 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                 <Car className="w-4 h-4" />
-                Car/Vehicle Received
+                Car Number (1-1000) *
               </label>
               <input
-                type="text"
+                type="number"
+                min="1"
+                max="1000"
                 value={carReceived}
-                onChange={(e) => setCarReceived(e.target.value)}
-                placeholder="Enter car model, license plate, or vehicle details"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                onChange={handleCarChange}
+                placeholder="Enter car number (1-1000)"
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg ${carError ? 'border-red-300' : 'border-gray-300'
+                  }`}
               />
+              {carError && (
+                <p className="mt-1 text-sm text-red-600">{carError}</p>
+              )}
             </div>
           )}
 
@@ -162,33 +142,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Digital Signature *
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
-              <canvas
-                ref={canvasRef}
-                width={600}
-                height={200}
-                className="w-full h-48 border border-gray-200 rounded cursor-crosshair bg-white"
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
-              />
-              <div className="mt-3 flex justify-between items-center">
-                <p className="text-sm text-gray-600">Sign above with your mouse or finger</p>
-                <button
-                  onClick={clearSignature}
-                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
-                >
-                  Clear Signature
-                </button>
-              </div>
-            </div>
-          </div>
-
           <div className="flex gap-3 pt-4 border-t border-gray-200">
             <button
               onClick={onClose}
@@ -198,7 +151,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
             </button>
             <button
               onClick={handleSave}
-              disabled={!hasSignature || !log.trim()}
+              disabled={!isFormValid}
               className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
             >
               <Save className="w-5 h-5" />

@@ -162,7 +162,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Driver Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Car Received</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Car Number</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Check In</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Check Out</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Shift</th>
@@ -184,6 +184,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 todaysRecords.map((record) => {
                   const hasCheckedIn = record.checkIn;
                   const hasCheckedOut = record.checkOut;
+                  const isCarLocked = hasCheckedIn; // Lock car number after check-in
 
                   return (
                     <tr key={record.id} className="hover:bg-gray-50 transition-colors">
@@ -193,13 +194,31 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <Car className="w-4 h-4 text-gray-400" />
-                          <input
-                            type="text"
-                            value={record.carReceived || ''}
-                            onChange={(e) => onUpdateCar(record.id, e.target.value)}
-                            placeholder="Enter car info"
-                            className="text-sm border border-gray-200 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full max-w-xs"
-                          />
+                          {isCarLocked ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-900 bg-gray-100 px-3 py-2 rounded border">
+                                {record.carReceived || 'Not assigned'}
+                              </span>
+                              <span className="text-xs text-gray-500">🔒 Locked</span>
+                            </div>
+                          ) : (
+                            <input
+                              type="number"
+                              min="1"
+                              max="1000"
+                              value={record.carReceived || ''}
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value);
+                                if (value >= 1 && value <= 1000) {
+                                  onUpdateCar(record.id, e.target.value);
+                                } else if (e.target.value === '') {
+                                  onUpdateCar(record.id, '');
+                                }
+                              }}
+                              placeholder="1-1000"
+                              className="text-sm border border-gray-200 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full max-w-xs"
+                            />
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -210,7 +229,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
                               <div className="text-sm font-medium text-green-700">
                                 {formatTime(hasCheckedIn.time)}
                               </div>
-                              <div className="text-xs text-gray-500">Signed & Logged</div>
+                              <div className="text-xs text-gray-500">Logged</div>
                             </div>
                           </div>
                         ) : (
@@ -228,7 +247,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
                               <div className="text-sm font-medium text-green-700">
                                 {formatTime(hasCheckedOut.time)}
                               </div>
-                              <div className="text-xs text-gray-500">Signed & Logged</div>
+                              <div className="text-xs text-gray-500">Logged</div>
                             </div>
                           </div>
                         ) : (

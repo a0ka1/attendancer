@@ -6,12 +6,10 @@ export interface AttendanceRecord {
   carReceived?: string;
   checkIn?: {
     time: string;
-    signature: string;
     log: string;
   };
   checkOut?: {
     time: string;
-    signature: string;
     log: string;
   };
 }
@@ -19,7 +17,7 @@ export interface AttendanceRecord {
 export interface SignatureModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (signature: string, log: string, carReceived?: string) => void;
+  onSave: (log: string, carReceived?: string) => void;
   type: 'check-in' | 'check-out';
   driverName: string;
   shift: '7am-4pm' | '4pm-1am' | '8am-5pm' | '5pm-2am';

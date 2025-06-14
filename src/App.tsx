@@ -54,7 +54,7 @@ function App() {
     });
   };
 
-  const handleSignatureSave = (signature: string, log: string, carReceived?: string) => {
+  const handleSignatureSave = (log: string, carReceived?: string) => {
     const { type, driverName, shift } = signatureModal;
     const currentTime = new Date().toISOString();
 
@@ -76,7 +76,6 @@ function App() {
         ...existingRecord,
         [type === 'check-in' ? 'checkIn' : 'checkOut']: {
           time: currentTime,
-          signature,
           log
         }
       };
@@ -248,7 +247,6 @@ function App() {
                           <ul className="text-sm text-gray-600 text-left bg-gray-50 rounded-lg p-3 mb-4">
                             <li>• All driver attendance records</li>
                             <li>• All check-in and check-out logs</li>
-                            <li>• All digital signatures</li>
                             <li>• All car assignment data</li>
                           </ul>
                         </div>
