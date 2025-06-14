@@ -62,7 +62,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
   const handleNewCheckIn = () => {
     if (!newDriverName.trim()) return;
-    
+
     onCheckIn(newDriverName.trim(), newDriverShift);
     setNewDriverName('');
     setShowCheckInForm(false);
@@ -80,7 +80,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
           <User className="w-6 h-6 text-blue-600" />
           Driver Check In
         </h2>
-        
+
         {!showCheckInForm ? (
           <button
             onClick={() => setShowCheckInForm(true)}
@@ -156,7 +156,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
             })}
           </h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
@@ -250,12 +250,11 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleCheckOut(record)}
-                            disabled={!hasCheckedIn || hasCheckedOut}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              !hasCheckedIn || hasCheckedOut
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg'
-                            }`}
+                            disabled={!hasCheckedIn?.time || hasCheckedOut?.time !== undefined}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${!hasCheckedIn || hasCheckedOut
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg'
+                              }`}
                           >
                             <LogOut className="w-4 h-4" />
                             Check Out

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Users, FileText, Clock, Shield, Trash2 } from 'lucide-react';
 import AttendanceTable from './components/AttendanceTable';
 import SignatureModal from './components/SignatureModal';
 import { AttendanceRecord } from './types';
-import { 
-  loadAttendanceRecords, 
+import {
+  loadAttendanceRecords,
   saveAttendanceRecords,
-  generateId 
+  generateId
 } from './utils/storage';
 
 function App() {
@@ -144,7 +144,7 @@ function App() {
         <div className="mb-8 text-center relative">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">Driver Attendance System</h1>
           <p className="text-lg text-gray-600">Enter your name to check in or check out</p>
-          
+
           {/* Admin Access Button */}
           <button
             onClick={() => setShowAdminPanel(true)}
@@ -210,7 +210,7 @@ function App() {
                         <div className="text-center mb-4">
                           <p className="text-green-600 font-medium">✓ Admin Access Granted</p>
                         </div>
-                        
+
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                           <h3 className="font-semibold text-red-800 mb-2">Danger Zone</h3>
                           <p className="text-sm text-red-600 mb-4">
@@ -242,7 +242,7 @@ function App() {
                             Confirm Data Deletion
                           </h3>
                           <p className="text-sm text-gray-600 mb-4">
-                            Are you absolutely sure you want to delete all attendance records? 
+                            Are you absolutely sure you want to delete all attendance records?
                             This action cannot be undone and will remove:
                           </p>
                           <ul className="text-sm text-gray-600 text-left bg-gray-50 rounded-lg p-3 mb-4">
@@ -252,7 +252,7 @@ function App() {
                             <li>• All car assignment data</li>
                           </ul>
                         </div>
-                        
+
                         <div className="flex gap-3">
                           <button
                             onClick={() => setShowClearConfirmation(false)}
